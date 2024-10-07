@@ -114,4 +114,43 @@ class HomeworkTest {
             assertEquals(result.currency, (pair.first + pair.second).currency)
         }
     }
+
+    @Test fun Money_edgeCases() {
+        // converting to the same currency
+        assertEquals(tenUSD.amount, tenUSD.convert("USD").amount)
+        assertEquals(tenUSD.currency, tenUSD.convert("USD").currency)
+    
+        // addition with same currency
+        val additionalUSD = Money(5, "USD")
+        val resultUSD = tenUSD + additionalUSD
+        assertEquals(15, resultUSD.amount)
+        assertEquals("USD", resultUSD.currency)
+    
+        // addition with different currencies
+        val resultGBP = tenUSD + fiveGBP.convert("USD")
+        assertEquals(20, resultGBP.amount)
+        assertEquals("USD", resultGBP.currency)
+    
+        // negative conversion
+        val negativeConversion = assertFailsWith(IllegalArgumentException::class) {
+            Money(10, "GBP").convert("YEN")
+        }
+    
+        // addition result in different currency
+        val resultGBPAddition = fiveGBP + Money(5, "GBP")
+        assertEquals(10, resultGBPAddition.amount)
+        assertEquals("GBP", resultGBPAddition.currency)
+    
+        // CAN to GBP
+        val conversionCANtoGBP = fifteenCAN.convert("GBP")
+        assertEquals(6, conversionCANtoGBP.amount)
+        assertEquals("GBP", conversionCANtoGBP.currency)
+    }
+
+    @Test fun Money_additionWithNegativeAmount() {
+        // Test adding negative money (should throw)
+        val ex = assertFailsWith(IllegalArgumentException::class) {
+            Money(5, "USD") + Money(-3, "USD")
+        }
+    }
 }
